@@ -12,13 +12,13 @@ export class OrdersService {
       id: '1',
       tipo_cambio: 'compra',
       monto_enviar: 100,
-      createdAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
     },
     {
       id: '2',
       tipo_cambio: 'compra',
       monto_enviar: 200,
-      createdAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
     },
   ];
 
@@ -26,7 +26,7 @@ export class OrdersService {
     const newOrder = {
       id: (this.orders.length + 1).toString(),
       ...createOrderDto,
-      createdAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
     };
     this.orders.push(newOrder);
   }
