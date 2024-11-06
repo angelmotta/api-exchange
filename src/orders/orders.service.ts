@@ -10,25 +10,44 @@ export class OrdersService {
   private orders: Order[] = [
     {
       id: '1',
-      tipo_cambio: 'compra',
-      monto_enviar: 100,
-      created_at: new Date().toISOString(),
+      tipoCambio: 'compra',
+      montoEnviar: 100,
+      montoRecibir: 100 * this.purchasePrice,
+      createdAt: new Date().toISOString(),
     },
     {
       id: '2',
-      tipo_cambio: 'compra',
-      monto_enviar: 200,
-      created_at: new Date().toISOString(),
+      tipoCambio: 'venta',
+      montoEnviar: 100,
+      montoRecibir: 100 / this.salePrice,
+      createdAt: new Date().toISOString(),
     },
   ];
 
   create(createOrderDto: CreateOrderDto) {
-    const newOrder = {
+    // Calculate total amount to receive
+    let montoRecibir;
+    if (createOrderDto.tipoCambio === 'compra') {
+      montoRecibir = createOrderDto.montoEnviar * this.purchasePrice;
+    } else if (createOrderDto.tipoCambio === 'venta') {
+      montoRecibir = createOrderDto.montoEnviar / this.salePrice;
+    } else {
+      throw new Error('Invalid tipo_cambio value');
+    }
+
+    // Create new order
+    const newOrder: Order = {
       id: (this.orders.length + 1).toString(),
       ...createOrderDto,
-      created_at: new Date().toISOString(),
+      montoRecibir,
+      createdAt: new Date().toISOString(),
     };
+
+    // TODO: save order to database
     this.orders.push(newOrder);
+
+    // return new order
+    return newOrder;
   }
 
   findAll() {

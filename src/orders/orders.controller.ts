@@ -6,17 +6,31 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
+  Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { Request, Response } from 'express';
 
 @Controller('/api/v1.1/orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  create(
+    @Body() createOrderDto: CreateOrderDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const createdOrder = this.ordersService.create(createOrderDto);
+
+    // Construct the URL of the created order (Location: http header)
+    const protocol = request.protocol;
+    const host = request.get('host');
+    const locationUrlNewOrder = `${protocol}://${host}/api/v1.1/orders/${createdOrder.id}`;
+
+    response.status(201).location(locationUrlNewOrder).json(createdOrder);
   }
 
   @Get()
