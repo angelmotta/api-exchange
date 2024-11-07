@@ -5,6 +5,7 @@ import { envConfig } from './config/env.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { getDatabaseConfig } from './config/database.config';
 import { RatesModule } from './rates/rates.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RatesModule } from './rates/rates.module';
     }),
     OrdersModule,
     RatesModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [],
