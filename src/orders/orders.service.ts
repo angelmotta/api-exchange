@@ -5,33 +5,42 @@ import { Order } from './schemas/order.schema';
 import { isValidObjectId, Model } from 'mongoose';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ResponseOrdersDto } from './dto/response-orders.dto';
+import { RatesService } from 'src/rates/rates.service';
 
 @Injectable()
 export class OrdersService {
-  readonly purchasePrice = 3.68;
-  readonly salePrice = 3.86;
+  readonly currencyPair = 'USDPEN';
 
   constructor(
-    @InjectModel(Order.name) private orderModel: Model<Order>
+    @InjectModel(Order.name) private orderModel: Model<Order>,
+    private readonly ratesService: RatesService
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
     // Calculate total amount to receive
+    // Use the rates service to search by currencyPair ("USDPEN")
+    const rate = await this.ratesService.findByCurrencyPair(this.currencyPair);
+    console.log(`retrieved rate:`);
+    console.log(rate);
+    
+    // Calculate total amount to receive  
     let montoRecibir;
     if (createOrderDto.tipoCambio === 'compra') {
-      montoRecibir = createOrderDto.montoEnviar * this.purchasePrice;
+      montoRecibir = createOrderDto.montoEnviar * rate.purchasePrice;
     } else if (createOrderDto.tipoCambio === 'venta') {
-      montoRecibir = createOrderDto.montoEnviar / this.salePrice;
+      montoRecibir = createOrderDto.montoEnviar / rate.salePrice;
     } else {
-      throw new Error('Invalid tipo_cambio value');
+      // return HTTP 400 Bad Request response (Should not happen)
+      throw new BadRequestException('Requested tipoCambio is not valid');
     }
-
-    const createdOrder = new this.orderModel({
+    // Create new order Object
+    const newOrder = new this.orderModel({
       ...createOrderDto,
       montoRecibir,
     });
-
-    return (await createdOrder.save()).toJSON();
+    // Save order to database
+    const savedOrder = await newOrder.save();
+    return savedOrder.toJSON();
   }
 
   async findAll(query: PaginationQueryDto): Promise<ResponseOrdersDto> {
