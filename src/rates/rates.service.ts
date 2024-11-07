@@ -1,9 +1,10 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateRateDto } from './dto/create-rate.dto';
 import { UpdateRateDto } from './dto/update-rate.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Rate } from './schemas/rates.schema';
 import { Model } from 'mongoose';
+import { isValidObjectId } from 'mongoose';
 
 @Injectable()
 export class RatesService {
@@ -18,7 +19,8 @@ export class RatesService {
       currencyPair: requestCreateRateDto.currencyPair,
     });
     if (existingRate) {
-      throw new ConflictException(`Requested Currency pair ${requestCreateRateDto.currencyPair} already exists`);
+      // return HTTP 409 Conflict response
+      throw new ConflictException(`Requested CurrencyPair ${requestCreateRateDto.currencyPair} already exists`);
     }
 
     // create new rate
@@ -30,13 +32,37 @@ export class RatesService {
     return await this.rateModel.find();
   }
 
-  async findOne(id: string) {
-    return await this.rateModel.findById(id);
+  async findOne(requestedId: string) {
+    // Verify if requestedId is a valid ObjectId
+    if (!isValidObjectId(requestedId)) {
+      throw new BadRequestException(`Invalid requested currencyPair ID: ${requestedId}`);
+    }
+
+    const rate = await this.rateModel.findById(requestedId);
+    if (!rate) {
+      // return HTTP 404 Not Found response
+      throw new NotFoundException(`Rate with ID ${requestedId} not found`);
+    }
+
+    return rate;
   }
 
-  async update(id: string, updateRateDto: UpdateRateDto) {
-    return await this.rateModel.findByIdAndUpdate(id, updateRateDto, {
+  async update(requestedId: string, requestUpdateRateDto: UpdateRateDto) {
+    // Validate ObjectId format first
+    if (!isValidObjectId(requestedId)) {
+      // return HTTP 400 Bad Request response
+      throw new BadRequestException(`Invalid requested currencyPair ID: ${requestedId}`);
+    }
+
+    const updatedRate = await this.rateModel.findByIdAndUpdate(requestedId, requestUpdateRateDto, {
       new: true,
     });
+    
+    if (!updatedRate) {
+      // return HTTP 404 Not Found response
+      throw new NotFoundException(`Rate with ID ${requestedId} not found`);
+    }
+
+    return updatedRate;
   }
 }
