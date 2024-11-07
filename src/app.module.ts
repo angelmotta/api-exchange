@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { envConfig } from './config/env.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { getDatabaseConfig } from './config/database.config';
+import { RatesModule } from './rates/rates.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { getDatabaseConfig } from './config/database.config';
       inject: [ConfigService],
     }),
     OrdersModule,
+    RatesModule,
   ],
   controllers: [],
   providers: [],
