@@ -17,12 +17,12 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(
+  async create(
     @Body() createOrderDto: CreateOrderDto,
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const createdOrder = this.ordersService.create(createOrderDto);
+    const createdOrder = await this.ordersService.create(createOrderDto);
 
     // Construct the URL of the created order (Location: http header)
     const protocol = request.protocol;

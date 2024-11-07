@@ -1,4 +1,4 @@
-export class Order {
+export class OrderEntity {
   id: string;
   tipoCambio: string;
   montoEnviar: number;

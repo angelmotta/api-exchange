@@ -1,13 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { Order } from './entities/order.entity';
+// import { Order } from './entities/order.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Order } from './schemas/order.schema';
+import { Model } from 'mongoose';
+import { OrderEntity } from './entities/order.entity';
 
 @Injectable()
 export class OrdersService {
   readonly purchasePrice = 3.68;
   readonly salePrice = 3.86;
 
-  private orders: Order[] = [
+  constructor(
+    @InjectModel(Order.name) private orderModel: Model<Order>
+  ) {}
+
+  private orders: OrderEntity[] = [
     {
       id: '1',
       tipoCambio: 'compra',
@@ -24,7 +32,7 @@ export class OrdersService {
     },
   ];
 
-  create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto): Promise<Order> {
     // Calculate total amount to receive
     let montoRecibir;
     if (createOrderDto.tipoCambio === 'compra') {
@@ -35,19 +43,12 @@ export class OrdersService {
       throw new Error('Invalid tipo_cambio value');
     }
 
-    // Create new order
-    const newOrder: Order = {
-      id: (this.orders.length + 1).toString(),
+    const createdOrder = new this.orderModel({
       ...createOrderDto,
       montoRecibir,
-      createdAt: new Date().toISOString(),
-    };
+    });
 
-    // TODO: save order to database
-    this.orders.push(newOrder);
-
-    // return new order
-    return newOrder;
+    return (await createdOrder.save()).toJSON();
   }
 
   findAll() {
