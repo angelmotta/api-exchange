@@ -32,30 +32,71 @@ currency-exchange-api
 │   ├── config
 │   │   ├── database.config.ts
 │   │   ├── env.config.ts
-│   ├── rates
-│   │   ├── rates.controller.ts
-│   │   ├── rates.module.ts
-│   │   ├── rates.service.ts
-│   │   ├── rates.schema.ts
-│   │   ├── rates.dto.ts
 │   ├── orders
+│   │   ├── dto
+│   │   ├── schemas
 │   │   ├── orders.controller.ts
 │   │   ├── orders.module.ts
 │   │   ├── orders.service.ts
-│   │   ├── orders.schema.ts
-│   │   ├── orders.dto.ts
+│   ├── rates
+│   │   ├── dto
+│   │   ├── schemas
+│   │   ├── rates.controller.ts
+│   │   ├── rates.module.ts
+│   │   ├── rates.service.ts
 │   ├── users
+│   │   ├── dto
+│   │   ├── schemas
 │   │   ├── users.controller.ts
 │   │   ├── users.module.ts
 │   │   ├── users.service.ts
-│   │   ├── users.schema.ts
-│   │   ├── users.dto.ts
 │   ├── app.module.ts
 │   ├── main.ts
 │
 │── .env.development
 │── Dockerfile
 │── docker-compose.yml
+```
+
+# Base de datos
+
+## Order
+
+El `schema` utilizado para el objeto `Order` incluye los siguientes campos tal como está definido en [order/schemas/order.schema.ts](./src/orders/schemas/order.schema.ts).
+
+```typescript
+export class Order {
+  id?: string;
+
+  @Prop({ required: true })
+  tipoCambio: string;
+
+  @Prop({ required: true, type: Number })
+  montoEnviar: number;
+
+  @Prop({ required: true, type: Number })
+  montoRecibir: number;
+
+  @Prop({
+    type: {
+      currencyPair: String,
+      purchasePrice: Number,
+      salePrice: Number,
+      createdAt: Date,
+      updatedAt: Date,
+    },
+    required: true,
+  })
+  rate: Rate; // Save Rate object (not a reference)
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+En este mismo file se ha incluido un `índice` en el campo `createdAt` para mejorar la performance de las consultas que requieran ordenar por fecha de creación.
+
+```typescript
+OrderSchema.index({ createdAt: 1 });
 ```
 
 # REST API
