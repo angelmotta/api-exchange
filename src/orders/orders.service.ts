@@ -63,7 +63,13 @@ export class OrdersService {
     return order;
   }
 
-  remove(id: string) {
+  remove(id: string): boolean {
+    const initialLength = this.orders.length;
     this.orders = this.orders.filter((order) => order.id !== id);
+    if (this.orders.length === initialLength) {
+      // No order was removed
+      return false;
+    }
+    return true;
   }
 }

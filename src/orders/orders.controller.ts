@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   Req,
+  NotFoundException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -44,7 +45,14 @@ export class OrdersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(id);
+  remove(@Param('id') id: string, @Res() response: Response) {
+    const wasDeleted = this.ordersService.remove(id);
+    if (!wasDeleted) {
+      // HTTP status code 404 (Not Found)
+      response.status(404).json({ message: `Order with id ${id} not found` });
+      return;
+    }
+    // return 204
+    response.status(204).send();
   }
 }
