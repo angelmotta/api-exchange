@@ -6,15 +6,57 @@ Rest API que permite ingresar precios de compra y venta de divisas.
 
 ## Project Stack
 
+De acuerdo a los requerimientos del proyecto, se ha decidido utilizar las siguientes tecnologías:
+
 - NestJS
 - MongoDB
 - Docker
 
 ## Project Features
 
-- Se implementaron las operaciones Create, Read, Update and Delete (CRUD) `Orders` (ordenes de compra/venta) incluyendo paginación para retornar la lista de `orders`
+- Se implementaron las operaciones Create, Read, Update and Delete (CRUD) del objeto `Orders` (ordenes de compra/venta de divisas). La implementación incluye `paginación` retornar de forma controlada una determinada cantidad de `orders`.
 - Se implementaron las operaciones Create, Read, Update `Rates` (precios de compra/venta de divisas: USD/PEN)
-- User Authentication: `Register` para registrarse y `Login` para autenticarse (Include generate JWT token)
+- User Authentication: `Register` para registrarse y `Login` para autenticarse (Include generate JWT token) y almacenamiento de passwords como hash para mayor seguridad.
+- Se incluye validación de `requests` usando `DTOs` (Data Transfer Objects) para asegurar que los datos ingresados por el cliente son válidos.
+- Se incluye `error handling` para manejar errores de forma controlada y retornar mensajes de error amigables al cliente.
+- Se incluye un `Dockerfile` para desplegar la aplicación REST API en un contenedor Docker. Así mismo se incluye un archivo `docker-compose.yml` para correr la aplicación y una base de datos MongoDB en contenedores separados.
+
+# Project structure
+
+El servicio tiene una organización basada en `features` y esta compuesto por diferentes `modulos` como `orders`, `rates`, `users`. Esto con la finalidad de facilitar la mantenibilidad del código.
+
+```bash
+currency-exchange-api
+├── src
+│   ├── common
+│   ├── config
+│   │   ├── database.config.ts
+│   │   ├── env.config.ts
+│   ├── rates
+│   │   ├── rates.controller.ts
+│   │   ├── rates.module.ts
+│   │   ├── rates.service.ts
+│   │   ├── rates.schema.ts
+│   │   ├── rates.dto.ts
+│   ├── orders
+│   │   ├── orders.controller.ts
+│   │   ├── orders.module.ts
+│   │   ├── orders.service.ts
+│   │   ├── orders.schema.ts
+│   │   ├── orders.dto.ts
+│   ├── users
+│   │   ├── users.controller.ts
+│   │   ├── users.module.ts
+│   │   ├── users.service.ts
+│   │   ├── users.schema.ts
+│   │   ├── users.dto.ts
+│   ├── app.module.ts
+│   ├── main.ts
+│
+│── .env.development
+│── Dockerfile
+│── docker-compose.yml
+```
 
 # REST API
 
