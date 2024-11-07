@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateRateDto } from './dto/create-rate.dto';
 import { UpdateRateDto } from './dto/update-rate.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,8 +12,17 @@ export class RatesService {
     @InjectModel(Rate.name) private rateModel: Model<Rate>
   ) {}
 
-  async create(createRateDto: CreateRateDto) {
-    const createdRate = new this.rateModel(createRateDto);
+  async create(requestCreateRateDto: CreateRateDto) {
+    // check if currencyPair already exists
+    const existingRate = await this.rateModel.findOne({
+      currencyPair: requestCreateRateDto.currencyPair,
+    });
+    if (existingRate) {
+      throw new ConflictException(`Requested Currency pair ${requestCreateRateDto.currencyPair} already exists`);
+    }
+
+    // create new rate
+    const createdRate = new this.rateModel(requestCreateRateDto);
     return (await createdRate.save()).toJSON();
   }
 
