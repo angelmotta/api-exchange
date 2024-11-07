@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
 
 @Schema({
     // Automatically adds createdAt and updatedAt fields
@@ -13,7 +14,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
       },
     },
 })
-export class Rate {
+export class Rate extends Document {
     id?: string;
 
     @Prop({ required: true, unique: true })

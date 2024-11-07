@@ -6,6 +6,7 @@ import { isValidObjectId, Model } from 'mongoose';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ResponseOrdersDto } from './dto/response-orders.dto';
 import { RatesService } from 'src/rates/rates.service';
+import { CreatedOrderResponseDto } from './dto/created-order-response.dto';
 
 @Injectable()
 export class OrdersService {
@@ -16,12 +17,10 @@ export class OrdersService {
     private readonly ratesService: RatesService
   ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+  async create(createOrderDto: CreateOrderDto): Promise<CreatedOrderResponseDto> {
     // Calculate total amount to receive
     // Use the rates service to search by currencyPair ("USDPEN")
     const rate = await this.ratesService.findByCurrencyPair(this.currencyPair);
-    console.log(`retrieved rate:`);
-    console.log(rate);
     
     // Calculate total amount to receive  
     let montoRecibir;
@@ -40,7 +39,25 @@ export class OrdersService {
     });
     // Save order to database
     const savedOrder = await newOrder.save();
-    return savedOrder.toJSON();
+    
+    // const savedOrder = (await newOrder.save()).toJSON();
+    // Return CreatedOrderResponseDto object
+    return {
+      id: savedOrder.id,
+      tipoCambio: savedOrder.tipoCambio,
+      montoEnviar: savedOrder.montoEnviar,
+      montoRecibir: savedOrder.montoRecibir,
+      rate: {
+        id: rate.id,
+        currencyPair: rate.currencyPair,
+        purchasePrice: rate.purchasePrice,
+        salePrice: rate.salePrice,
+        createdAt: rate.toJSON().createdAt,
+        updatedAt: rate.toJSON().updatedAt,
+      },
+      createdAt: savedOrder.createdAt,
+      updatedAt: savedOrder.updatedAt,
+    };
   }
 
   async findAll(query: PaginationQueryDto): Promise<ResponseOrdersDto> {

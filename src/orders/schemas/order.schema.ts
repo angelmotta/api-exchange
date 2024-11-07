@@ -4,17 +4,17 @@ import { HydratedDocument } from 'mongoose';
 export type OrderDocument = HydratedDocument<Order>;
 
 @Schema({
-  // Automatically adds createdAt and updatedAt fields
-  timestamps: true,
-  // This transformer helps standardize the response format
-  toJSON: {
-    transform: (doc, ret) => {
-      ret.id = ret._id;
-      delete ret._id;
-      delete ret.__v;
-      return ret;
+    // Automatically adds createdAt and updatedAt fields
+    timestamps: true,
+    // This transformer helps standardize the response format
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      },
     },
-  },
 })
 export class Order {
   id?: string;
@@ -27,6 +27,9 @@ export class Order {
 
   @Prop({ required: true, type: Number })
   montoRecibir: number;
+
+  createdAt: Date;  // Declare these even though Mongoose adds them
+  updatedAt: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
