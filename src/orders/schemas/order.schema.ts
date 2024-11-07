@@ -7,7 +7,6 @@ export type OrderDocument = HydratedDocument<Order>;
   // Automatically adds createdAt and updatedAt fields
   timestamps: true,
   // This transformer helps standardize the response format
-  // This transformer helps standardize the response format
   toJSON: {
     transform: (doc, ret) => {
       ret.id = ret._id;
@@ -33,7 +32,3 @@ export class Order {
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
 OrderSchema.index({ createdAt: 1 }); // Add index to createdAt field
-
-// OrderSchema.virtual('id').get(function () {
-//   return this._id.toHexString();
-// });

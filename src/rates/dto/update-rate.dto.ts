@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsIn, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class UpdateRateDto {
   @IsNumber()
