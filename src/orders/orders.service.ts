@@ -5,6 +5,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Order } from './schemas/order.schema';
 import { Model } from 'mongoose';
 import { OrderEntity } from './entities/order.entity';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { ResponseOrdersDto } from './dto/response-orders.dto';
 
 @Injectable()
 export class OrdersService {
@@ -51,8 +53,21 @@ export class OrdersService {
     return (await createdOrder.save()).toJSON();
   }
 
-  findAll() {
-    return this.orders;
+  async findAll(query: PaginationQueryDto): Promise<ResponseOrdersDto> {
+    const { page, size } = query;
+    const orders = await this.orderModel
+      .find()
+      .skip(page * size)
+      .limit(size);
+
+    const totalOrders = await this.orderModel.countDocuments();
+    
+    return {
+      orders,
+      totalOrders,
+      pageNumber: page,
+      pageSize: size,
+    };
   }
 
   findOne(id: string) {

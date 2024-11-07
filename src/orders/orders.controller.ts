@@ -7,10 +7,12 @@ import {
   Delete,
   Res,
   Req,
+  Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Request, Response } from 'express';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('/api/v1.1/orders')
 export class OrdersController {
@@ -32,9 +34,10 @@ export class OrdersController {
     response.status(201).location(locationUrlNewOrder).json(createdOrder);
   }
 
+  // Get all orders paginated
   @Get()
-  findAll() {
-    return this.ordersService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.ordersService.findAll(query);
   }
 
   @Get(':id')
