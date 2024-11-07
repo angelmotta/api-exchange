@@ -12,6 +12,8 @@ export const envConfig: ConfigModuleOptions = {
     PORT: Joi.number().default(3000),
     MONGODB_URI: Joi.string().required(),
     MONGODB_DB_NAME: Joi.string().required(),
+    JWT_SECRET: Joi.string().required(),
+    JWT_EXPIRES_IN: Joi.string().required()
   }),
   validationOptions: {
     abortEarly: true, // stop validation on first error
