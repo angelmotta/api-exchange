@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Order } from './entities/order.entity';
 
@@ -55,7 +55,12 @@ export class OrdersService {
   }
 
   findOne(id: string) {
-    return this.orders.find((order) => order.id === id);
+    const order = this.orders.find((order) => order.id === id);
+    if (!order) {
+      // HTTP status code 404 (Not Found)
+      throw new NotFoundException(`Order with id ${id} not found`);
+    }
+    return order;
   }
 
   remove(id: string) {
