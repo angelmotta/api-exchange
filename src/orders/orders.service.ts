@@ -21,7 +21,12 @@ export class OrdersService {
     // Calculate total amount to receive
     // Use the rates service to search by currencyPair ("USDPEN")
     const rate = await this.ratesService.findByCurrencyPair(this.currencyPair);
-    
+    // Check if rate is found
+    if (!rate) {
+      // return HTTP 404 Not Found response
+      throw new NotFoundException(`Rate with currency pair ${this.currencyPair} not found (Create Rate first)`);
+    }
+
     // Calculate total amount to receive  
     let montoRecibir;
     if (createOrderDto.tipoCambio === 'compra') {

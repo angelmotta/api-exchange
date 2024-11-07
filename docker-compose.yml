@@ -1,5 +1,22 @@
 version: '3.8'
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: exchange_api
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - MONGODB_URI=mongodb://admin:admin123@mongodb:27017
+      - MONGODB_DB_NAME=exchange_db
+      - JWT_SECRET=my-little-dirty-secret
+      - JWT_EXPIRES_IN=24h
+    depends_on:
+      - mongodb
+
   mongodb:
     image: mongo:latest
     container_name: exchange_mongodb
