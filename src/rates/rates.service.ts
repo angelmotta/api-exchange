@@ -12,15 +12,6 @@ export class RatesService {
     @InjectModel(Rate.name) private rateModel: Model<Rate>
   ) {}
 
-  private rates = [
-    {
-      id: '1',
-      currencyPair: 'USDPEN',
-      purchasePrice: 3.7,
-      salePrice: 3.8,
-    },
-  ];
-
   async create(createRateDto: CreateRateDto) {
     const createdRate = new this.rateModel(createRateDto);
     return (await createdRate.save()).toJSON();
