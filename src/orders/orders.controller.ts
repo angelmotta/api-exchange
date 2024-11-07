@@ -13,6 +13,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Request, Response } from 'express';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { log } from 'console';
 
 @Controller('/api/v1.1/orders')
 export class OrdersController {
@@ -25,8 +26,9 @@ export class OrdersController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const createdOrder = await this.ordersService.create(createOrderDto);
-
-    // Construct the URL of the created order (Location: http header)
+    
+    // Order created and stored in DB
+    // Include URL of new order Http header Location and return response
     const protocol = request.protocol;
     const host = request.get('host');
     const locationUrlNewOrder = `${protocol}://${host}/api/v1.1/orders/${createdOrder.id}`;
@@ -36,24 +38,19 @@ export class OrdersController {
 
   // Get all orders paginated
   @Get()
-  findAll(@Query() query: PaginationQueryDto) {
+  async findAll(@Query() query: PaginationQueryDto) {
     return this.ordersService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.ordersService.findOne(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() response: Response) {
-    const wasDeleted = this.ordersService.remove(id);
-    if (!wasDeleted) {
-      // HTTP status code 404 (Not Found)
-      response.status(404).json({ message: `Order with id ${id} not found` });
-      return;
-    }
-    // return 204
+  async remove(@Param('id') id: string, @Res() response: Response) {
+    await this.ordersService.remove(id);
+    // return HTTP 204 No Content response if delete operation is successful
     response.status(204).send();
   }
 }

@@ -46,6 +46,12 @@ export class RatesService {
 
     return rate;
   }
+  
+  // Only used internally from orders service to find rate by currency pair name
+  async findByCurrencyPair(requestedCurrencyPair: string): Promise<Rate> {
+    const rate = await this.rateModel.findOne({ currencyPair: requestedCurrencyPair });
+    return rate;
+  }
 
   async update(requestedId: string, requestUpdateRateDto: UpdateRateDto) {
     // Validate ObjectId format first
