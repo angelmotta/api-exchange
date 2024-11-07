@@ -10,5 +10,5 @@ export class PaginationQueryDto {
   @IsOptional()
   @Min(1)
   @Type(() => Number)
-  size?: number = 10;
+  size?: number = 20;
 }

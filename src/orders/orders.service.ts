@@ -36,6 +36,7 @@ export class OrdersService {
     const newOrder = new this.orderModel({
       ...createOrderDto,
       montoRecibir,
+      rate: rate.toJSON(),
     });
     // Save order to database
     const savedOrder = await newOrder.save();

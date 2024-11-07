@@ -25,6 +25,9 @@ export class Rate extends Document {
 
     @Prop({ required: true, type: Number })
     salePrice: number;
+
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export const RateSchema = SchemaFactory.createForClass(Rate);

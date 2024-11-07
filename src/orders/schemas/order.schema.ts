@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { Rate } from 'src/rates/schemas/rates.schema';
 
 export type OrderDocument = HydratedDocument<Order>;
 
@@ -28,7 +29,19 @@ export class Order {
   @Prop({ required: true, type: Number })
   montoRecibir: number;
 
-  createdAt: Date;  // Declare these even though Mongoose adds them
+  @Prop({
+    type: {
+      currencyPair: String,
+      purchasePrice: Number,
+      salePrice: Number,
+      createdAt: Date,
+      updatedAt: Date,
+    },
+    required: true,
+  })
+  rate: Rate; // Save a complete Snapshot of the Rate object (not the reference)
+
+  createdAt: Date;
   updatedAt: Date;
 }
 
