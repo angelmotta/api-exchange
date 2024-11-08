@@ -62,7 +62,7 @@ currency-exchange-api
 
 ## Order
 
-El `schema` utilizado para el objeto `Order` incluye los siguientes campos tal como está definido en [order/schemas/order.schema.ts](./src/orders/schemas/order.schema.ts).
+El `schema` utilizado para el objeto `Order` incluye los siguientes campos tal como está definido en el archivo [src/order/schemas/order.schema.ts](./src/orders/schemas/order.schema.ts).
 
 ```typescript
 export class Order {
@@ -93,10 +93,73 @@ export class Order {
 }
 ```
 
+Vale recalcar que se esta incluyendo en el campo `rate` el objeto anidado del tipo `Rate` el cual usado como parte de esta transacción. De acuerdo a los `requerimientos` indicados estamos incluyendo este objeto el cual es de utilidad para conocer cuál fue el precio utilizado en dicha transacción. Esto facilita también facilita la auditoría de transacciones históricas.
+
 En este mismo file se ha incluido un `índice` en el campo `createdAt` para mejorar la performance de las consultas que requieran ordenar por fecha de creación.
 
 ```typescript
 OrderSchema.index({ createdAt: 1 });
+```
+
+## Rates
+
+El schema `rates` esta definido en el archivo [src/rates/schemas/rates.schema.ts](./src/rates/schemas/rates.schema.ts)
+
+```typescript
+export class Rate extends Document {
+  id?: string;
+
+  @Prop({ required: true, unique: true })
+  currencyPair: string; // USDPEN
+
+  @Prop({ required: true, type: Number })
+  purchasePrice: number;
+
+  @Prop({ required: true, type: Number })
+  salePrice: number;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+## Users
+
+El schema `users` esta definido en el archivo [src/users/schemas/users.schema.ts](./src/users/schemas/user.schema.ts)
+
+```typescript
+export class User extends Document {
+  id?: string;
+
+  @Prop({ required: true, unique: true })
+  email: string;
+
+  @Prop({ required: true })
+  password: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+Las contraseñas se guardan en la base de datos como `hash` mediante el siguiente middleware el cual es invocado automaticamente en cada operación `save` del modelo `User`
+
+```typescript
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+```
+
+Se ha considerado el uso de `índice` en el campo `email` para mejorar la performance de las consultas que requieran buscar por email. Adicionalmente se ha incluido el `constraint` de `unique` para asegurar que no se puedan registrar dos usuarios con el mismo email.
+
+```typescript
+UserSchema.index({ email: 1 }, { unique: true });
 ```
 
 # REST API
@@ -106,6 +169,7 @@ Se prestó especial atención en seguir el standard HTTP para la implementación
 ## Rates
 
 Un `rate` representa un tiempo de cambio entre un par de monedas `USD/PEN` para esta versión del API.
+
 Esta versión del API aun no tiene una función de `seed` data implementado por lo que se debe crear primero un `rate` de la siguiente forma para registrar ordenes de compra/venta `orders`
 
 ### Crear nuevo `rate`
@@ -187,7 +251,7 @@ Response body:
 
 - Siguiendo el standard HTTP, el cliente recibe el URL con el detalle de su `order` como `http://localhost:3000/api/v1.1/orders/{ID}` el cual es retornado en el HTTP Header `Location` como parte de la respuesta de creación de la `order`
 - La `order` registrada incluye el `rate` usado para la conversión de divisas en el momento de la creación de la `order`.
-- Esta versión del API asume que la solicitud es cambio entre soles/dolares (USD/PEN) sin embargo, se puede extender para otros tipos de cambio ya que se cuenta con una colección de `rates` (actualmente con solo USD/PEN pero extensible a otras monedas)
+- Esta versión del API asume que la solicitud es entre soles/dolares (USD/PEN), sin embargo se puede extender para otros tipos de pares de monedas ya que se cuenta con una colección de `rates` (actualmente solo un registro para USD/PEN)
 
 POST `http://localhost:3000/api/v1.1/orders`
 
@@ -354,7 +418,7 @@ Response body: No content
 
 ### Registrar un nuevo usuario
 
-La creación de un nuevo usuario incluye la generación de un `JWT token` como parte de la respuesta. Este token tiene un tiempo de vida de 24 horas (configurable)
+La creación de un nuevo usuario incluye la generación de un `JWT token` la cual es enviada como parte de la respuesta para evitar que el usuario haga un segundo `HTTP request` solicitando el token. Este token tiene un tiempo de vida de 24 horas (configurable)
 
 POST `http://localhost:3000/api/v1.1/users`
 
@@ -381,9 +445,9 @@ Response body
 }
 ```
 
-### Autenticar un usuario
+### Autenticación de un usuario
 
-GET `http://localhost:3000/api/v1.1/users/login`
+POST `http://localhost:3000/api/v1.1/users/login`
 
 Request body
 
@@ -442,11 +506,21 @@ LOG [NestApplication] Nest application successfully started +2ms
 docker compose stop
 ```
 
-## Deploy
+# Deploy
 
-- Utilizando el Dockerfile se puede utilizar un servicio de CI/CD para desplegar la aplicación de forma automática.
+- Utilizando el [Dockerfile](./Dockerfile) definido en la raíz de este proyecto se puede hacer un `build` de la aplicación en modo de `container` como parte de un pipeline CI/CD.
+- Se puede controlar el `environment` utilizando los scripts definidos en el package.json y la instrucción para ejecutar la aplicación definida en el `Dockerfile` que actualmente esta definido de la siguiente forma `CMD ["npm", "run", "start:dev"]` sin embargo se podría cambiar a `CMD ["npm", "run", "start:prod"]`
+
+```bash
+CMD ["npm", "run", "start:dev"]
+```
+
 - Se puede utilizar un servicio de orquestación de contenedores como Kubernetes para escalar la aplicación y manejar el tráfico de forma eficiente.
 
-## Alcance y limitaciones
+# Alcance y limitaciones
 
-- Por dificultad de tiempo, en esta versión actual del API no tiene implementado los middleware de autorización.
+Algunas funcionalidades que por restricciones de tiempo no he logrado aún implementar.
+
+- Esta versión del API no tiene implementado aún el middleware de autorización el cual debe verificar el token JWT incluido en el header (`Authorization` header) de cada solicitud HTTP.
+- Esta versión del servicio no tiene una documentación tipo Swagger para facilitar la interacción con el mismo. Se puede implementar usando `NestJS Swagger` o `OpenAPI`.
+- Esta versión del API no tiene una función de `seed` implementado por lo que se debe crear primero un `rate` como pre-requisito ([ver aquí](#crear-nuevo-rate)) antes de crear una `order`.
