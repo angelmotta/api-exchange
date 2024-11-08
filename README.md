@@ -2,13 +2,13 @@
 
 # Descripción general
 
-Rest API que permite ingresar precios de compra y venta de divisas.
+Rest API que permite realizar órdenes de compra y venta por cambio de divisas (USD/PEN).
 
 ## Project Stack
 
 De acuerdo a los requerimientos del proyecto, se ha decidido utilizar las siguientes tecnologías:
 
-- NestJS
+- NestJS (Typescript)
 - MongoDB
 - Docker
 
@@ -516,6 +516,29 @@ CMD ["npm", "run", "start:dev"]
 ```
 
 - Se puede utilizar un servicio de orquestación de contenedores como Kubernetes para escalar la aplicación y manejar el tráfico de forma eficiente.
+
+# Configuración general del servicio
+
+El proyecto tiene comandos definidos en el archivo `package.json` para correr la aplicación en modo `development` y `production` usando comandos como `npm run start:dev` o `npm run start:prod`.
+
+```bash
+"start:dev": "cross-env NODE_ENV=development nest start --watch",
+
+"start:prod": "cross-env NODE_ENV=production node dist/main",
+```
+
+El `docker-compose.yml` levanta el servicio usando la instrucción `npm run start:dev`.
+
+El proyecto cuando se ejecuta de forma `local` lee variables de entorno utilizando el siguiente archivo `.env.development` el cual debe ser creado en la raíz del proyecto.
+
+```bash
+NODE_ENV=development
+PORT=3000
+MONGODB_URI=mongodb://admin:admin123@localhost:27017
+MONGODB_DB_NAME=exchange_db
+JWT_SECRET=my-little-dirty-secret
+JWT_EXPIRES_IN=24h
+```
 
 # Alcance y limitaciones
 
